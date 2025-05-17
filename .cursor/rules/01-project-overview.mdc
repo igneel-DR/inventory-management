@@ -1,0 +1,16 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Overview
+
+This is an inventory management system for O.T.R.A FOOD DISTRIBUTION.
+
+The project is divided into two main parts:
+-   **Frontend**: A React (Vite) application located in the `[frontend](mdc:frontend)` directory. It uses Tailwind CSS and Shadcn UI for styling and components.
+-   **Backend**: A Node.js and Express application located in the `[backend](mdc:backend)` directory. It uses MongoDB as the database with Mongoose for ODM.
+
+Key technologies include:
+- Frontend: React, Vite, Tailwind CSS, Shadcn UI, react-router-dom
+- Backend: Node.js, Express, MongoDB, Mongoose, JWT for authentication

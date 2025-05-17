@@ -1,0 +1,60 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# API Endpoints Overview
+
+This rule provides a summary of the main backend API endpoints, their purpose, and an example of their usage. All API routes are prefixed with `/api`.
+
+## Authentication (`[authRoutes.js](mdc:backend/routes/authRoutes.js)`)
+-   **`POST /api/auth/login`**
+    -   **Description**: Authenticates a user and returns a JWT and user data.
+    -   **Request Body**: `{ "email": "user@example.com", "password": "yourpassword" }`
+    -   **Response**: `{ "token": "jwt_token_here", "user": { "id": "...", "name": "...", "email": "...", "role": "..." } }`
+    -   **Handled by**: `[loginUser](mdc:backend/controllers/authController.js#loginUser)`
+-   **`POST /api/auth/register`** (If registration is implemented)
+    -   **Description**: Registers a new user.
+    -   **Request Body**: `{ "name": "Test User", "email": "test@example.com", "password": "password123", "role": "Stock Manager" }`
+    -   **Response**: `{ "token": "jwt_token_here", "user": { ... } }` or a success message.
+    -   **Handled by**: `[registerUser](mdc:backend/controllers/authController.js#registerUser)`
+-   **`GET /api/auth/me`**
+    -   **Description**: Retrieves the currently authenticated user's profile (requires JWT).
+    -   **Headers**: `Authorization: Bearer <token>`
+    -   **Response**: `{ "id": "...", "name": "...", "email": "...", "role": "..." }`
+    -   **Handled by**: `[getMe](mdc:backend/controllers/authController.js#getMe)` (protected by `[protect](mdc:backend/middleware/authMiddleware.js#protect)`)
+
+## Products (`[productRoutes.js](mdc:backend/routes/productRoutes.js)`)
+All product routes are protected and require authentication.
+-   **`POST /api/products`**
+    -   **Description**: Adds a new product to the inventory.
+    -   **Request Body**: `{ "name": "Product Name", "category": "Category", "quantity": 100, "price": 29.99, "supplier": "Supplier Name" }`
+    -   **Response**: The created product object.
+    -   **Handled by**: `[createProduct](mdc:backend/controllers/productController.js#createProduct)`
+-   **`GET /api/products`**
+    -   **Description**: Retrieves a list of all products.
+    -   **Response**: An array of product objects.
+    -   **Handled by**: `[getProducts](mdc:backend/controllers/productController.js#getProducts)`
+-   **`GET /api/products/:id`**
+    -   **Description**: Retrieves a single product by its ID.
+    -   **Response**: A single product object.
+    -   **Handled by**: `[getProductById](mdc:backend/controllers/productController.js#getProductById)`
+-   **`PUT /api/products/:id`**
+    -   **Description**: Updates an existing product by its ID.
+    -   **Request Body**: Fields to update (e.g., `{ "quantity": 150, "price": 27.99 }`)
+    -   **Response**: The updated product object.
+    -   **Handled by**: `[updateProduct](mdc:backend/controllers/productController.js#updateProduct)`
+-   **`DELETE /api/products/:id`**
+    -   **Description**: Deletes a product by its ID.
+    -   **Response**: Success message or the ID of the deleted product.
+    -   **Handled by**: `[deleteProduct](mdc:backend/controllers/productController.js#deleteProduct)`
+
+## KPIs (`[kpiRoutes.js](mdc:backend/routes/kpiRoutes.js)`)
+All KPI routes are protected and require authentication.
+-   **`GET /api/kpis`**
+    -   **Description**: Retrieves Key Performance Indicators relevant to the authenticated user's role.
+    -   **Response**: An object containing KPI data (e.g., `{ "totalProducts": 500, "lowStockItems": 10, "totalValue": 12500.75 }`). The structure may vary based on the user role.
+    -   **Handled by**: `[getKpis](mdc:backend/controllers/kpiController.js#getKpis)`
+
+**Note**: This is a general overview. Specific request/response bodies and controller function names might vary slightly based on the exact implementation. Refer to the respective route and controller files for precise details.
+

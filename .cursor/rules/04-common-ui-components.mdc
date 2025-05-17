@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Common UI Components
+
+This rule outlines important reusable UI components used throughout the frontend application. Understanding these components is key to understanding the UI structure and development patterns.
+
+## Layout Components:
+-   `[Layout.jsx](mdc:frontend/src/components/layout/Layout.jsx)`: The main layout wrapper for authenticated pages. It includes the `[Sidebar.jsx](mdc:frontend/src/components/layout/Sidebar.jsx)` and provides a consistent structure (header, content area).
+-   `[Sidebar.jsx](mdc:frontend/src/components/layout/Sidebar.jsx)`: The navigation sidebar, containing links to different sections of the application like Dashboard and Products. It uses `lucide-react` icons.
+
+## Dashboard Components:
+-   `[KpiCard.jsx](mdc:frontend/src/pages/DashboardPage.jsx#KpiCard)`: (Currently within `[DashboardPage.jsx](mdc:frontend/src/pages/DashboardPage.jsx)`) A reusable card component to display Key Performance Indicators (KPIs). It takes `title`, `value`, and `icon` as props. *Consider moving this to `[frontend/src/components/dashboard/KpiCard.jsx](mdc:frontend/src/components/dashboard/KpiCard.jsx)` for better organization.*
+-   `[AdminDashboard.jsx](mdc:frontend/src/components/dashboard/AdminDashboard.jsx)`: Displays information and controls relevant to Admin users.
+-   `[StockManagerDashboard.jsx](mdc:frontend/src/components/dashboard/StockManagerDashboard.jsx)`: Displays information and controls relevant to Stock Manager users.
+-   `[AccountantDashboard.jsx](mdc:frontend/src/components/dashboard/AccountantDashboard.jsx)`: Displays information and controls relevant to Accountant users.
+
+## Shadcn UI Components (`[frontend/src/components/ui](mdc:frontend/src/components/ui)`):
+Shadcn UI components are heavily used for building the user interface. These are unstyled, accessible components that can be easily customized with Tailwind CSS.
+
+Key Shadcn components used or likely to be used:
+-   `[Button](mdc:frontend/src/components/ui/button.jsx)`: For interactive buttons.
+-   `[Card](mdc:frontend/src/components/ui/card.jsx)`: Used for `KpiCard` and potentially other content containers.
+-   `[Table](mdc:frontend/src/components/ui/table.jsx)`: For displaying tabular data, like the product list in `[ProductPage.jsx](mdc:frontend/src/pages/ProductPage.jsx)`.
+-   `[Input](mdc:frontend/src/components/ui/input.jsx)`: For form fields.
+-   `[Label](mdc:frontend/src/components/ui/label.jsx)`: For labeling form fields.
+-   `[Dialog](mdc:frontend/src/components/ui/dialog.jsx)`: For modals, e.g., an "Add New Product" form.
+-   `[Select](mdc:frontend/src/components/ui/select.jsx)`: For dropdown selection.
+-   `[Toast](mdc:frontend/src/components/ui/toast.jsx)` and `[use-toast](mdc:frontend/src/components/ui/use-toast.js)`: For displaying notifications.
+
+Refer to the `[frontend/src/components/ui](mdc:frontend/src/components/ui)` directory for the full list of available Shadcn components and their implementations.
+
+## Icons:
+-   `lucide-react` is used for icons. Icons are imported directly into components where needed, e.g., `import { LayoutDashboard, Package, Users } from 'lucide-react';`.

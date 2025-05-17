@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Frontend Structure (`[frontend](mdc:frontend)`)
+
+The frontend application is built with React and Vite.
+
+## Key Directories:
+-   `[frontend/src](mdc:frontend/src)`: Main source code directory.
+    -   `[frontend/src/components](mdc:frontend/src/components)`: Reusable UI components.
+        -   `[frontend/src/components/ui](mdc:frontend/src/components/ui)`: Shadcn UI components (e.g., Button, Card, Table).
+        -   `[frontend/src/components/layout](mdc:frontend/src/components/layout)`: Layout components like `[Layout.jsx](mdc:frontend/src/components/layout/Layout.jsx)` and `[Sidebar.jsx](mdc:frontend/src/components/layout/Sidebar.jsx)`.
+        -   `[frontend/src/components/dashboard](mdc:frontend/src/components/dashboard)`: Role-specific dashboard panel components like `[AdminDashboard.jsx](mdc:frontend/src/components/dashboard/AdminDashboard.jsx)`.
+    -   `[frontend/src/pages](mdc:frontend/src/pages)`: Page-level components (e.g., `[LoginPage.jsx](mdc:frontend/src/pages/LoginPage.jsx)`, `[DashboardPage.jsx](mdc:frontend/src/pages/DashboardPage.jsx)`, `[ProductPage.jsx](mdc:frontend/src/pages/ProductPage.jsx)`).
+    -   `[frontend/src/context](mdc:frontend/src/context)`: React Context API for global state management (e.g., `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)`).
+    -   `[frontend/src/assets](mdc:frontend/src/assets)`: Static assets like images (if any).
+-   `[frontend/public](mdc:frontend/public)`: Static assets served directly by Vite.
+
+## Entry Points:
+-   `[frontend/index.html](mdc:frontend/index.html)`: The main HTML file.
+-   `[frontend/src/main.jsx](mdc:frontend/src/main.jsx)`: The main JavaScript entry point where the React app is initialized and providers (Router, AuthProvider) are set up.
+-   `[frontend/src/App.jsx](mdc:frontend/src/App.jsx)`: The root application component where routing is defined.
+
+## Styling:
+-   Tailwind CSS is configured via `[frontend/tailwind.config.js](mdc:frontend/tailwind.config.js)` and `[frontend/postcss.config.js](mdc:frontend/postcss.config.js)`.
+-   Global styles and Tailwind directives are in `[frontend/src/index.css](mdc:frontend/src/index.css)`.
+
+## State Management:
+-   Authentication state is managed via `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)`.
+-   Local component state is managed with `useState` and `useEffect` hooks.

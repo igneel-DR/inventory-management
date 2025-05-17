@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Backend API Structure (`[backend](mdc:backend)`)
+
+The backend is a Node.js and Express application responsible for handling API requests, interacting with the MongoDB database, and managing business logic.
+
+## Key Directories:
+-   `[backend/models](mdc:backend/models)`: Contains Mongoose schema definitions for database collections (e.g., `[User.js](mdc:backend/models/User.js)`, `[Product.js](mdc:backend/models/Product.js)`, `[Kpi.js](mdc:backend/models/Kpi.js)`).
+-   `[backend/routes](mdc:backend/routes)`: Defines API routes and maps them to controller functions (e.g., `[authRoutes.js](mdc:backend/routes/authRoutes.js)`, `[productRoutes.js](mdc:backend/routes/productRoutes.js)`, `[kpiRoutes.js](mdc:backend/routes/kpiRoutes.js)`).
+-   `[backend/controllers](mdc:backend/controllers)`: Contains the logic for handling requests and responses for each route (e.g., `[authController.js](mdc:backend/controllers/authController.js)`, `[productController.js](mdc:backend/controllers/productController.js)`, `[kpiController.js](mdc:backend/controllers/kpiController.js)`).
+-   `[backend/middleware](mdc:backend/middleware)`: Custom middleware functions, such as for authentication (`[authMiddleware.js](mdc:backend/middleware/authMiddleware.js)`) or error handling.
+-   `[backend/config](mdc:backend/config)`: Configuration files, like database connection strings (e.g., `[db.js](mdc:backend/config/db.js)`).
+-   `[backend/utils](mdc:backend/utils)`: Utility functions that can be shared across the backend.
+
+## Entry Point:
+-   `[backend/server.js](mdc:backend/server.js)`: The main server file that sets up the Express application, connects to the database, registers middleware, and starts the server.
+
+## Routing:
+-   Routes are defined in the `[backend/routes](mdc:backend/routes)` directory.
+-   The main `[server.js](mdc:backend/server.js)` file mounts these route handlers (e.g., `app.use('/api/auth', authRoutes)`).
+
+## Database:
+-   MongoDB is used as the database.
+-   Mongoose is used as the ODM (Object Data Modeling) library to interact with MongoDB.
+-   Database connection logic is typically in `[backend/config/db.js](mdc:backend/config/db.js)` and called from `[server.js](mdc:backend/server.js)`.
+
+## Authentication:
+-   JWT (JSON Web Tokens) are used for authentication.
+-   Authentication logic (login, registration) is handled in `[authController.js](mdc:backend/controllers/authController.js)`.
+-   `[authMiddleware.js](mdc:backend/middleware/authMiddleware.js)` is used to protect routes that require authentication.

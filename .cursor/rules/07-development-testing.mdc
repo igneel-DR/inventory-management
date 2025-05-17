@@ -1,0 +1,91 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development and Testing
+
+This rule provides guidance on setting up the development environment, running the application, and general testing practices.
+
+## Prerequisites:
+-   Node.js and npm (or yarn) installed.
+-   MongoDB instance running (local or cloud-based, e.g., MongoDB Atlas).
+    -   Ensure the MongoDB connection string in `[backend/.env](mdc:backend/.env)` (or `[backend/config/db.js](mdc:backend/config/db.js)` if not using `.env` for this) is correctly configured.
+
+## Setup:
+1.  **Clone the Repository** (if applicable).
+2.  **Install Backend Dependencies**:
+    ```bash
+    cd backend
+    npm install
+    # or yarn install
+    ```
+3.  **Install Frontend Dependencies**:
+    ```bash
+    cd frontend
+    npm install
+    # or yarn install
+    ```
+4.  **Environment Variables (`[backend/.env](mdc:backend/.env)`)**:
+    Create a `.env` file in the `[backend](mdc:backend)` directory with necessary variables:
+    ```env
+    NODE_ENV=development
+    PORT=5001 # Or your preferred port for the backend
+    MONGO_URI=your_mongodb_connection_string
+    JWT_SECRET=your_jwt_secret_key
+    ```
+    Replace placeholders with your actual configuration values.
+
+## Running the Application:
+
+1.  **Start the Backend Server**:
+    From the `[backend](mdc:backend)` directory:
+    ```bash
+    npm run dev
+    # or yarn dev (if dev script is configured in package.json, typically runs server with nodemon)
+    # Alternatively: npm start or yarn start
+    ```
+    The backend API will typically be available at `http://localhost:5001` (or the port specified in `.env`).
+
+2.  **Start the Frontend Development Server**:
+    From the `[frontend](mdc:frontend)` directory:
+    ```bash
+    npm run dev
+    # or yarn dev
+    ```
+    The frontend application will typically be available at `http://localhost:5173` (Vite's default) or another port if specified.
+
+## Testing:
+
+### Frontend:
+-   **Manual Testing**: After any changes, thoroughly test the UI in a browser.
+    -   Verify login and logout functionality.
+    -   Check navigation between pages (`[DashboardPage.jsx](mdc:frontend/src/pages/DashboardPage.jsx)`, `[ProductPage.jsx](mdc:frontend/src/pages/ProductPage.jsx)`).
+    -   Ensure role-specific dashboards display correctly.
+    -   Test CRUD operations for products (Add, View, Edit, Delete) once implemented.
+    -   Check responsiveness if applicable.
+-   **Component Testing**: Consider adding unit/integration tests for key components using libraries like Jest and React Testing Library, especially for:
+    -   Forms and input validation.
+    -   Components with complex logic.
+    -   `AuthContext` interactions.
+-   **E2E Testing**: For more comprehensive testing, tools like Cypress or Playwright can be used to simulate user flows.
+
+### Backend:
+-   **API Testing**: Use tools like Postman, Insomnia, or `curl` to test API endpoints directly.
+    -   Verify authentication and authorization (JWT handling, protected routes).
+    -   Test CRUD operations for each resource (`User`, `Product`, `Kpi`).
+    -   Check error handling and response codes.
+-   **Unit/Integration Tests**: Use frameworks like Jest or Mocha with Supertest for testing controllers, services, and models.
+    -   Test business logic in controllers.
+    -   Verify database interactions through models.
+    -   Ensure middleware functions correctly.
+
+## Code Quality & Linting:
+-   The frontend likely uses ESLint and Prettier (check `[frontend/package.json](mdc:frontend/package.json)` and config files like `[frontend/.eslintrc.cjs](mdc:frontend/.eslintrc.cjs)`).
+-   Run linters and formatters regularly:
+    ```bash
+    # In frontend directory
+    npm run lint
+    npm run format # (if a format script exists)
+    ```
+-   Address linter warnings and errors to maintain code consistency and prevent bugs.

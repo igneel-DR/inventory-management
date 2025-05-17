@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Authentication Flow and Context
+
+This rule describes the authentication mechanism, user session management, and how user information is accessed within the frontend application.
+
+## Core Components:
+-   `[LoginPage.jsx](mdc:frontend/src/pages/LoginPage.jsx)`: The page where users enter their credentials to log in.
+-   `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)`: A React Context that provides authentication state (`user`, `token`, `isAuthenticated`, `isLoading`) and functions (`login`, `logout`) to its descendant components.
+-   `[App.jsx](mdc:frontend/src/App.jsx)`: Wraps protected routes with the `AuthProvider` from `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)` and uses a `ProtectedRoute` component to manage access.
+-   `[ProtectedRoute.jsx](mdc:frontend/src/components/ProtectedRoute.jsx)`: A component that checks if a user is authenticated. If not, it redirects them to the `[LoginPage.jsx](mdc:frontend/src/pages/LoginPage.jsx)`. The `Layout` component is rendered within `ProtectedRoute` for authenticated users.
+
+## Authentication Process:
+1.  **Login Attempt**: The user submits their email and password on the `[LoginPage.jsx](mdc:frontend/src/pages/LoginPage.jsx)`.
+2.  **API Call**: The `login` function in `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)` makes a POST request to the backend API endpoint (e.g., `/api/auth/login`) with the user's credentials.
+3.  **Backend Verification**: The backend (`[authController.js](mdc:backend/controllers/authController.js)`) verifies the credentials against the database (`[User.js](mdc:backend/models/User.js)` model).
+4.  **Token Generation**: If credentials are valid, the backend generates a JWT (JSON Web Token).
+5.  **Token Response**: The backend sends the JWT and user information (excluding sensitive data like the password) back to the frontend.
+6.  **Context Update**: The `login` function in `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)` updates its state with the received user data and token. The token is typically stored in `localStorage` for persistence.
+7.  **Redirection**: The user is redirected to a protected page, usually the `[DashboardPage.jsx](mdc:frontend/src/pages/DashboardPage.jsx)`.
+
+## Session Management:
+-   The JWT stored in `localStorage` is used to maintain the user's session across browser refreshes or new tabs.
+-   On application load, `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)` attempts to load the user and token from `localStorage` to re-establish the session.
+-   The `[authMiddleware.js](mdc:backend/middleware/authMiddleware.js)` on the backend verifies the JWT sent with each request to protected API endpoints.
+
+## Accessing User Information:
+-   Components that need access to user information or authentication status can use the `useAuth` hook, which consumes `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)`.
+    ```jsx
+    import { useAuth } from '../context/AuthContext';
+
+    function MyComponent() {
+      const { user, isAuthenticated, logout } = useAuth();
+      // ...
+    }
+    ```
+
+## Logout:
+-   The `logout` function in `[AuthContext.jsx](mdc:frontend/src/context/AuthContext.jsx)` removes the user and token from its state and `localStorage`.
+-   The user is then redirected to the `[LoginPage.jsx](mdc:frontend/src/pages/LoginPage.jsx)`.
+-   The logout button is part of the `[Sidebar.jsx](mdc:frontend/src/components/layout/Sidebar.jsx)`.
