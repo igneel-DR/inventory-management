@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Home, 
@@ -13,43 +13,17 @@ import {
   Tags,
   UserCircle,
   ClipboardList,
-  MessageSquareText,
-  ChevronLeft,
-  ChevronRight
+  MessageSquareText
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export default function Sidebar({ onClose }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  // Check for saved preference in localStorage
-  useEffect(() => {
-    const savedState = localStorage.getItem('sidebarExpanded');
-    if (savedState !== null) {
-      setIsExpanded(savedState === 'true');
-    }
-  }, []);
-  
-  // Save preference to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem('sidebarExpanded', isExpanded);
-  }, [isExpanded]);
-  
-  const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
-  };
   
   if (!user) return null;
 
@@ -108,8 +82,22 @@ export default function Sidebar({ onClose }) {
   // Filter based on user role
   const filteredNavItems = navItems.filter(item => item.roles.includes(user.role.toLowerCase()));
   
-  // Simply use the filtered items as the sidebar items
-  let sidebarItems = [...filteredNavItems];
+  // Build complete sidebar items by adding profile, settings, and audit logs
+  const sidebarItems = [
+    ...filteredNavItems,
+    {
+      title: "My Profile",
+      href: "/profile",
+      icon: UserCircle,
+      roles: ['admin', 'stock_manager', 'accountant']
+    },
+    {
+      title: "Settings",
+      href: "/settings",
+      icon: Settings,
+      roles: ['admin', 'stock_manager', 'accountant']
+    },
+  ];
   
   // Add audit logs only for admins
   if (user?.role.toLowerCase() === 'admin') {
@@ -122,139 +110,68 @@ export default function Sidebar({ onClose }) {
   }
 
   return (
-    <div className={cn(
-      "flex h-full flex-col overflow-auto border-r bg-background transition-all duration-300 ease-in-out",
-      isExpanded ? "w-60" : "w-16"
-    )}>
-      <div className={cn(
-        "flex h-16 items-center px-4",
-        isExpanded ? "justify-between" : "justify-center"
-      )}>
-        {isExpanded ? (
-          <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
-            <span className="font-semibold text-lg">O.T.R.A</span>
-            <span className="text-xs text-muted-foreground">Food Distribution</span>
-          </Link>
-        ) : (
-          <Link to="/dashboard" className="flex items-center justify-center">
-            <span className="font-semibold text-lg">O</span>
-          </Link>
-        )}
-        <div className="flex items-center">
-          {isExpanded && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={onClose}
-              aria-label="Close sidebar"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className={cn("hidden md:flex transition-transform", !isExpanded && "rotate-180")}
-            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-        </div>
+    <div className="flex h-full flex-col overflow-auto border-r bg-background">
+      <div className="flex h-16 items-center justify-between px-4">
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <span className="font-semibold text-lg">O.T.R.A</span>
+          <span className="text-xs text-muted-foreground">Food Distribution</span>
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={onClose}
+          aria-label="Close sidebar"
+        >
+          <X className="h-5 w-5" />
+        </Button>
       </div>
 
       <nav className="flex-1 space-y-1 px-2 py-4">
-        <TooltipProvider delayDuration={300}>
-          {sidebarItems.map((item) => {
-            const isActive = location.pathname === item.href || 
-                            (item.href !== "/dashboard" && location.pathname.startsWith(item.href));
-            const Icon = item.icon;
-            
-            return isExpanded ? (
-              <Link
-                key={item.href}
-                to={item.href}
-                onClick={() => onClose && window.innerWidth < 768 ? onClose() : null}
+        {sidebarItems.map((item) => {
+          const isActive = location.pathname === item.href || 
+                           (item.href !== "/dashboard" && location.pathname.startsWith(item.href));
+          const Icon = item.icon;
+          
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              onClick={() => onClose && window.innerWidth < 768 ? onClose() : null}
+              className={cn(
+                "group flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary/10 text-primary dark:bg-primary/20"
+                  : "text-foreground/70 hover:bg-accent hover:text-foreground"
+              )}
+            >
+              <Icon 
                 className={cn(
-                  "group flex items-center rounded-md text-sm font-medium transition-colors px-3 py-2.5",
-                  isActive
-                    ? "bg-primary/10 text-primary dark:bg-primary/20"
-                    : "text-foreground/70 hover:bg-accent hover:text-foreground"
-                )}
-              >
-                <Icon 
-                  className={cn(
-                    "h-5 w-5 shrink-0 mr-3",
-                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-                  )} 
-                />
-                <span className="transition-opacity duration-300">{item.title}</span>
-              </Link>
-            ) : (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to={item.href}
-                    onClick={() => onClose && window.innerWidth < 768 ? onClose() : null}
-                    className={cn(
-                      "group flex items-center rounded-md text-sm font-medium transition-colors py-2.5 justify-center",
-                      isActive
-                        ? "bg-primary/10 text-primary dark:bg-primary/20"
-                        : "text-foreground/70 hover:bg-accent hover:text-foreground"
-                    )}
-                  >
-                    <Icon 
-                      className={cn(
-                        "h-5 w-5 shrink-0 mx-auto",
-                        isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-                      )} 
-                    />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="font-medium">
-                  {item.title}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
-        </TooltipProvider>
+                  "mr-3 h-5 w-5 shrink-0",
+                  isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                )} 
+              />
+              {item.title}
+            </Link>
+          );
+        })}
+        
+        <Separator className="my-4" />
+        
+        <Button variant="outline" className="w-full justify-start" onClick={() => {
+          logout();
+          navigate('/login');
+        }}>
+          <LogOut className="mr-3 h-5 w-5 text-muted-foreground" />
+          Logout
+        </Button>
       </nav>
       
       <div className="mt-auto border-t p-4">
-        <TooltipProvider delayDuration={300}>
-          {isExpanded ? (
-            <Button 
-              variant="outline" 
-              className="w-full justify-start transition-all duration-300" 
-              onClick={() => {
-                logout();
-                navigate('/login');
-              }}
-            >
-              <LogOut className="h-5 w-5 text-muted-foreground mr-3" />
-              <span>Logout</span>
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-center px-0 transition-all duration-300" 
-                  onClick={() => {
-                    logout();
-                    navigate('/login');
-                  }}
-                >
-                  <LogOut className="h-5 w-5 text-muted-foreground mx-auto" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="font-medium">
-                Logout
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </TooltipProvider>
+        <div className="mb-3 space-y-1">
+          <p className="text-sm font-medium">{user.name || user.email}</p>
+          <p className="text-xs capitalize text-muted-foreground">Role: {user.role}</p>
+        </div>
       </div>
     </div>
   );

@@ -156,22 +156,6 @@ export function AddProductModal({
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-right">
-                Price ($)
-              </Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={newProductData.price}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="expirationDate" className="text-right">
                 Expiration Date
               </Label>

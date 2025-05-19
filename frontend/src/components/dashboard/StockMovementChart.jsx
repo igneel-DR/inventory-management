@@ -53,6 +53,7 @@ export default function StockMovementChart() {
       }
       
       const data = await response.json();
+      console.log("Raw stock movement chart data:", data);
       
       // Check if we have only one unique date with non-zero data
       const uniqueDatesWithData = new Set();

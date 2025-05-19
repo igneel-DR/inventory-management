@@ -19,7 +19,7 @@ export default class AiService {
     
     // Database schema reference for the AI prompt
     this.dbSchema = `
-      Products Schema:
+      Product Schema:
       - _id: ObjectId
       - name: String (product name)
       - description: String (product description)
@@ -29,16 +29,17 @@ export default class AiService {
       - minimumStockLevel: Number (reorder point)
       - price: Number (product price)
       - expirationDate: Date (product expiration date, if applicable)
+      - isLowStock: Virtual Boolean (true if currentQuantity < minimumStockLevel)
       - createdAt: Date (when the product was added)
       - updatedAt: Date (when the product was last updated)
       
-      Categories Schema:
+      Category Schema:
       - _id: ObjectId
       - name: String (category name)
       - description: String (category description)
       - isActive: Boolean (whether category is active)
       
-      Suppliers Schema:
+      Supplier Schema:
       - _id: ObjectId
       - name: String (supplier name)
       - email: String (supplier email)
@@ -46,7 +47,7 @@ export default class AiService {
       - company: String (supplier company name)
       - city: String (supplier location)
       
-      StockMovements Schema:
+      StockMovement Schema:
       - _id: ObjectId
       - product: ObjectId (references Product)
       - movementType: String (enum: 'in', 'out')
@@ -75,15 +76,10 @@ export default class AiService {
         - Return ONLY the SQL query without any explanations or comments.
         - The SQL must be compatible with MongoDB's aggregation pipeline syntax.
         - Support multilingual queries (Arabic, French, English, etc.).
-        - For low stock questions, refer to items where currentQuantity == 0, which means the item is out of stock or considered low stock.
+        - For questions about low stock, reference the isLowStock virtual property.
         - For time-based queries, use the appropriate date operations.
         - NEVER ask for clarification - make reasonable assumptions if needed.
         - Use proper variable naming and avoid SQL injection risks.
-        - You must ONLY generate read-only operations (SELECT queries).
-        - NEVER generate INSERT, UPDATE, DELETE, or other write operations.
-        - Your query MUST start with 'SELECT' or use 'FIND()' or 'AGGREGATE()' functions.
-        - IMPORTANT FOR JOINS: Always use lowercase collection names ('products', 'suppliers', 'categories', 'stockmovements').
-        - For supplier lookups, use case-insensitive regex match when possible: { $regex: 'supplier name', $options: 'i' }
         - DO NOT include anything other than the SQL query in your response.
         
         USER QUESTION: "${userQuery}"
@@ -142,17 +138,6 @@ export default class AiService {
    * @returns {string} - Sanitized SQL query
    */
   sanitizeQuery(query) {
-    if (!query || typeof query !== 'string') {
-      throw new Error('Invalid query format');
-    }
-    
-    // Clean the query - remove SQL code blocks if present
-    let cleanedQuery = query.trim();
-    if (cleanedQuery.startsWith('```') && cleanedQuery.endsWith('```')) {
-      // Remove markdown code blocks
-      cleanedQuery = cleanedQuery.replace(/^```[\w]*\n|```$/g, '');
-    }
-    
     // Remove any potentially dangerous commands
     const dangerousCommands = [
       'DROP', 'DELETE', 'TRUNCATE', 'ALTER', 'UPDATE', 'INSERT',
@@ -160,54 +145,22 @@ export default class AiService {
     ];
 
     // Basic validation to ensure we're only allowing read operations
-    const queryUpperCase = cleanedQuery.toUpperCase().trim();
+    const queryUpperCase = query.toUpperCase();
     
     for (const cmd of dangerousCommands) {
-      if (queryUpperCase.includes(` ${cmd} `) || 
-          queryUpperCase.startsWith(`${cmd} `) || 
-          queryUpperCase.includes(`;${cmd} `)) {
-        console.error(`Dangerous command detected: ${cmd} in query: ${cleanedQuery}`);
+      if (queryUpperCase.includes(cmd)) {
         throw new Error('Unauthorized operation detected in query');
       }
     }
 
-    // Check if it's a MongoDB aggregation query
-    const isMongoDbAggregation = (
-      (cleanedQuery.includes('db.') && cleanedQuery.includes('.aggregate')) ||
-      // Support for array-style aggregation pipelines with various operations
-      (cleanedQuery.startsWith('[') && (
-        cleanedQuery.includes('$match') || 
-        cleanedQuery.includes('$group') || 
-        cleanedQuery.includes('$project') || 
-        cleanedQuery.includes('$lookup') ||
-        cleanedQuery.includes('$sort') ||
-        cleanedQuery.includes('$limit')
-      )) ||
-      (cleanedQuery.includes('aggregate([')) ||
-      (cleanedQuery.includes('find('))
-    );
-    
-    // Check if it's a SQL query starting with SELECT
-    const isSqlSelect = queryUpperCase.startsWith('SELECT');
-    
-    // If neither valid MongoDB nor SQL syntax, reject
-    if (!isMongoDbAggregation && !isSqlSelect) {
-      console.error(`Query doesn't use valid read operation syntax: ${cleanedQuery}`);
-      throw new Error('Only read operations are allowed (MongoDB aggregate/find or SQL SELECT)');
-    }
-    
-    // For MongoDB queries, check if they contain write operations
-    if (isMongoDbAggregation) {
-      const writeOperations = ['$out', '$merge', '$replaceRoot', '$replaceWith'];
-      for (const op of writeOperations) {
-        if (cleanedQuery.includes(op)) {
-          console.error(`MongoDB write operation detected: ${op} in query: ${cleanedQuery}`);
-          throw new Error(`Unauthorized MongoDB operation detected: ${op}`);
-        }
-      }
+    // Ensure query is SELECT only
+    if (!queryUpperCase.trim().startsWith('SELECT') && 
+        !queryUpperCase.includes('FIND(') && 
+        !queryUpperCase.includes('AGGREGATE(')) {
+      throw new Error('Only read operations are allowed');
     }
 
-    return cleanedQuery;
+    return query;
   }
 
   /**

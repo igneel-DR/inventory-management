@@ -15,32 +15,14 @@ export default class QueryExecutor {
    */
   async executeQuery(query) {
     try {
-      // Clean up the query
-      if (typeof query === 'string') {
-        query = query.trim();
-      }
+      // Parse the query to determine what we're looking for
+      const queryLower = query.toLowerCase();
       
-      //console.log('Query type:', typeof query);
-      
-      // Check if the query is a string or an object
-      if (typeof query === 'object' || 
-          (typeof query === 'string' && (query.startsWith('[') && query.endsWith(']')))) {
-        // It's likely a MongoDB aggregation pipeline array
-        console.log('Detected MongoDB array format');
-        return await this.executeMongoArrayQuery(query);
-      }
-      
-      // If it's a string, determine if it's MongoDB or SQL
-      const queryLower = typeof query === 'string' ? query.toLowerCase() : '';
-      
-      // Handle MongoDB specific syntax in string format
-      if (queryLower.includes('aggregate(') || queryLower.includes('find(') || 
-          queryLower.includes('db.')) {
-        console.log('Detected MongoDB string format');
+      // Handle MongoDB specific syntax
+      if (queryLower.includes('aggregate(') || queryLower.includes('find(')) {
         return await this.executeMongoQuery(query);
       } else {
         // Handle SQL-like syntax
-        console.log('Detected SQL format');
         return await this.executeSqlLikeQuery(query);
       }
     } catch (error) {
@@ -54,155 +36,46 @@ export default class QueryExecutor {
    * @param {string} query - MongoDB query string
    * @returns {Promise<Array>} - Query results
    */
-  /**
-   * Execute a MongoDB query that's already in array format
-   * @param {Array|string} query - MongoDB aggregation pipeline array or string representation
-   * @returns {Promise<Array>} - Query results
-   */
-  async executeMongoArrayQuery(query) {
-    try {      
-      // If the query is a string representation of an array, parse it
-      let pipeline;
-      if (typeof query === 'string') {
-        try {
-          // Use Function constructor to safely evaluate the array
-          const pipelineFunction = new Function(`return ${query}`);
-          pipeline = pipelineFunction();
-        } catch (parseError) {
-          console.error('Error parsing pipeline array string:', parseError);
-          throw new Error(`Invalid pipeline array format: ${parseError.message}`);
-        }
-      } else {
-        // It's already an object/array
-        pipeline = query;
-      }
-      
-      // Determine the model to use from the pipeline
-      // Default to Product for low stock queries
-      const model = Product;
-      
-      console.log('Executing aggregation with pipeline:', JSON.stringify(pipeline, null, 2));
-      return await model.aggregate(pipeline).exec();
-    } catch (error) {
-      console.error('MongoDB array query execution error:', error);
-      throw new Error(`Failed to execute MongoDB array query: ${error.message}`);
-    }
-  }
-  
-  /**
-   * Execute a MongoDB-specific query in string format
-   * @param {string} query - MongoDB query string
-   * @returns {Promise<Array>} - Query results
-   */
   async executeMongoQuery(query) {
     try {
-      // Clean up the query string
-      query = query.trim();
-      
-      // Detect query type and collection
+      // This is a simplified approach - in production, you'd want a more robust parser
       let collection = 'products'; // Default to products
-      const queryLower = query.toLowerCase();
       
-      if (queryLower.includes('db.categories') || queryLower.includes('category')) {
+      if (query.toLowerCase().includes('category')) {
         collection = 'categories';
-      } else if (queryLower.includes('db.suppliers') || queryLower.includes('supplier')) {
+      } else if (query.toLowerCase().includes('supplier')) {
         collection = 'suppliers';
-      } else if (queryLower.includes('db.stockmovements') || queryLower.includes('stockmovement')) {
+      } else if (query.toLowerCase().includes('stockmovement')) {
         collection = 'stockmovements';
       }
       
+      // Execute the query using eval (careful, this is simplified for demo purposes)
+      // In production, you'd want to use a proper parser and validation
       const model = this.getModelForCollection(collection);
       
-      // Handle MongoDB aggregation pipeline format
-      if (queryLower.includes('aggregate')) {
-        
-        // Manually parse MongoDB aggregation pipeline for better control
-        // and to avoid JSON parse issues
-        try {
-          // Extract model name and determine correct model collection
-          let modelName = 'products'; // Default
-          
-          if (queryLower.includes('db.')) {
-            // Extract model name from db.X.aggregate format
-            const dbMatch = query.match(/db\.([^\s.]+)/i);
-            if (dbMatch && dbMatch[1]) {
-              modelName = dbMatch[1].toLowerCase();
-            }
-          }
-          
-          // Get the model based on the collection name (handles both 'product' and 'Product')
-          const model = this.getModelForCollection(modelName);
-          
-          // Now extract and parse the aggregation pipeline
-          // First, we identify the full pipeline string inside the square brackets
-          let startIdx = query.indexOf('[');
-          let endIdx = query.lastIndexOf(']');
-          
-          if (startIdx === -1 || endIdx === -1) {
-            throw new Error('Could not locate aggregation pipeline brackets [] in query');
-          }
-          
-          // Extract the pipeline string including the brackets
-          const fullPipelineStr = query.substring(startIdx, endIdx + 1);
-          
-          // We'll use Function constructor for safer evaluation
-          // This avoids eval() but still allows us to parse the MongoDB query syntax
-          const pipelineFunction = new Function(`return ${fullPipelineStr}`);
-          const pipeline = pipelineFunction();
-          
-          // Execute the aggregation with the parsed pipeline
-          return await model.aggregate(pipeline).exec();
-        } catch (error) {
-          console.error('Error parsing or executing MongoDB aggregation:', error);
-          throw new Error(`MongoDB aggregation error: ${error.message}`);
-        }
-      } 
-      // Handle find queries
-      else if (queryLower.includes('find(')) {
-        
-        try {
-          // Extract model name and determine correct model collection
-          let modelName = 'products'; // Default
-          
-          if (queryLower.includes('db.')) {
-            // Extract model name from db.X.find format
-            const dbMatch = query.match(/db\.([^\s.]+)/i);
-            if (dbMatch && dbMatch[1]) {
-              modelName = dbMatch[1].toLowerCase();
-            }
-          }
-          
-          // Get the model based on the collection name
-          const model = this.getModelForCollection(modelName);
-          
-          // Extract the filter object within parentheses
-          let startIdx = query.indexOf('(');
-          let endIdx = query.lastIndexOf(')');
-          
-          if (startIdx === -1 || endIdx === -1) {
-            throw new Error('Could not locate find filter parentheses () in query');
-          }
-          
-          // Extract the filter string
-          const filterStr = query.substring(startIdx + 1, endIdx).trim();
-          
-          // Parse the filter - handling empty filter case
-          let filter = {};
-          if (filterStr && filterStr !== '') {
-            const filterFunction = new Function(`return ${filterStr}`);
-            filter = filterFunction();
-          }
-            
-          // Execute find
-          return await model.find(filter).lean().exec();
-        } catch (error) {
-          console.error('Error parsing or executing MongoDB find:', error);
-          throw new Error(`MongoDB find error: ${error.message}`);
-        }
-      }
+      // Make safe versions of query methods
+      const safeFunctions = {
+        find: (filter) => model.find(filter).lean().exec(),
+        findOne: (filter) => model.findOne(filter).lean().exec(),
+        aggregate: (pipeline) => model.aggregate(pipeline).exec(),
+        count: (filter) => model.countDocuments(filter).exec()
+      };
+      
+      // Replace model methods with safe versions
+      const safeQuery = query
+        .replace(/Product\.find\(/g, 'safeFunctions.find(')
+        .replace(/Category\.find\(/g, 'safeFunctions.find(')
+        .replace(/Supplier\.find\(/g, 'safeFunctions.find(')
+        .replace(/StockMovement\.find\(/g, 'safeFunctions.find(')
+        .replace(/\.findOne\(/g, '.find(')
+        .replace(/\.aggregate\(/g, '.aggregate(')
+        .replace(/\.count\(/g, '.count(');
+      
+      // Execute the safe query
+      return await eval(`(async () => { return ${safeQuery} })()}`);
     } catch (error) {
       console.error('MongoDB query execution error:', error);
-      throw new Error(`Failed to execute MongoDB query: ${error.message}`);
+      throw new Error('Failed to execute MongoDB query');
     }
   }
 

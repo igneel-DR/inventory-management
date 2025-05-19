@@ -12,7 +12,7 @@ const router = express.Router();
 router.post('/', protect, authorize('admin', 'stock_manager'), async (req, res) => {
   const {
     name, description, category: categoryId, supplier: supplierId, 
-    initialQuantity, minimumStockLevel, expirationDate, productId, price
+    initialQuantity, minimumStockLevel, expirationDate, productId
   } = req.body;
 
   try {
@@ -43,9 +43,8 @@ router.post('/', protect, authorize('admin', 'stock_manager'), async (req, res) 
       supplier: supplierId || undefined, // Set to undefined if not provided
       currentQuantity: initialQuantity || 0,
       minimumStockLevel: minimumStockLevel || 0,
-      price: price,
       expirationDate,
-      productId
+      productId // Custom product ID if provided
     });
 
     const createdProduct = await product.save();
@@ -107,7 +106,7 @@ router.get('/:id', protect, async (req, res) => {
 router.put('/:id', protect, authorize('admin', 'stock_manager'), async (req, res) => {
   const {
     name, description, category: categoryId, supplier: supplierId,
-    currentQuantity, minimumStockLevel, expirationDate, productId, price
+    currentQuantity, minimumStockLevel, expirationDate, productId
   } = req.body;
 
   try {
@@ -146,7 +145,6 @@ router.put('/:id', protect, authorize('admin', 'stock_manager'), async (req, res
     product.minimumStockLevel = minimumStockLevel === undefined ? product.minimumStockLevel : minimumStockLevel;
     product.expirationDate = expirationDate === undefined ? product.expirationDate : expirationDate; 
     product.productId = productId === undefined ? product.productId : productId;
-    product.price = price === undefined ? product.price : price;
 
     const updatedProduct = await product.save();
     // Populate for response

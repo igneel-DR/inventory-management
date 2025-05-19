@@ -1,27 +1,13 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Bell, Menu, X, User, Settings, LogOut } from 'lucide-react';
+import { Bell, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export default function Header({ onMenuToggle }) {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -75,55 +61,19 @@ export default function Header({ onMenuToggle }) {
         
         <ThemeToggle />
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="p-0 flex items-center gap-2 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-              <div className="hidden md:block text-left">
-                <p className="text-sm font-medium">{user?.name || 'User'}</p>
-                <p className="text-xs text-muted-foreground">{user?.role || 'Role'}</p>
-              </div>
-              <div className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground",
-                "text-sm font-medium uppercase hover:shadow-md transition-all duration-200"
-              )}>
-                {user?.name ? user.name.charAt(0) : 'U'}
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <div className="flex items-center justify-start gap-2 p-2">
-              <div className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground",
-                "text-sm font-medium uppercase "
-              )}>
-                {user?.name ? user.name.charAt(0) : 'U'}
-              </div>
-              <div className="flex flex-col space-y-0.5">
-                <p className="text-sm font-medium">{user?.name || 'User'}</p>
-                <p className="text-xs text-muted-foreground">{user?.role || 'Role'}</p>
-              </div>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/profile" className="cursor-pointer flex w-full items-center">
-                <User className="mr-2 h-4 w-4" />
-                <span>My Profile</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/settings" className="cursor-pointer flex w-full items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <div className="hidden md:block">
+            <p className="text-sm font-medium">{user?.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground">{user?.role || 'Role'}</p>
+          </div>
+          <div className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground",
+            "text-sm font-medium uppercase"
+          )}>
+            {user?.name ? user.name.charAt(0) : 'U'}
+          </div>
+        </div>
       </div>
     </header>
   );
-}
+} 

@@ -36,7 +36,6 @@ export default function ProductPage() {
     supplier: "",
     currentQuantity: 0,
     minimumStockLevel: 0,
-    price: "",
     expirationDate: "",
   });
   
@@ -229,12 +228,6 @@ export default function ProductPage() {
       return;
     }
     
-    let price = newProductData.price !== null && newProductData.price !== '' ? parseFloat(newProductData.price) : null;
-    if (newProductData.price && (isNaN(price) || price < 0)) {
-      toast.error("Validation Error: Price must be a non-negative number.");
-      return;
-    }
-    
     if (newProductData.expirationDate && isNaN(new Date(newProductData.expirationDate).getTime())) {
         toast.error("Validation Error: Invalid Expiration Date.");
         return;
@@ -249,7 +242,6 @@ export default function ProductPage() {
       supplier: newProductData.supplier || undefined,
       initialQuantity: currentQuantity,
       minimumStockLevel: minimumStockLevel,
-      price: price || undefined,
       expirationDate: newProductData.expirationDate || undefined,
     };
 
@@ -283,7 +275,6 @@ export default function ProductPage() {
         supplier: "",
         currentQuantity: 0,
         minimumStockLevel: 0,
-        price: "",
         expirationDate: "",
       });
 
@@ -300,7 +291,6 @@ export default function ProductPage() {
       productId: product.productId || "",
       category: product.category?._id || "",
       supplier: product.supplier?._id || "",
-      price: product.price || "",
       expirationDate: product.expirationDate ? new Date(product.expirationDate).toISOString().split('T')[0] : "",
     });
     setIsEditModalOpen(true);
@@ -337,12 +327,6 @@ export default function ProductPage() {
       toast.error("Validation Error: Minimum Stock Level must be a non-negative number.");
       return;
     }
-    
-    let price = editingProduct.price !== null && editingProduct.price !== '' ? parseFloat(editingProduct.price) : null;
-    if (editingProduct.price && (isNaN(price) || price < 0)) {
-      toast.error("Validation Error: Price must be a non-negative number.");
-      return;
-    }
 
     if (editingProduct.expirationDate && isNaN(new Date(editingProduct.expirationDate).getTime())) {
         toast.error("Validation Error: Invalid Expiration Date.");
@@ -360,7 +344,6 @@ export default function ProductPage() {
       supplier: supplierId || undefined,
       currentQuantity: currentQuantity,
       minimumStockLevel: minimumStockLevel,
-      price: price || undefined,
       expirationDate: updateData.expirationDate || undefined,
     };
 

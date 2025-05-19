@@ -74,7 +74,6 @@ export function ProductTable({
                 <TableHead>Product Info</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Supplier</TableHead>
-                <TableHead className="text-right">Price</TableHead>
                 <TableHead className="text-right">Quantity</TableHead>
                 <TableHead className="text-right">Min. Stock</TableHead>
                 <TableHead>Status</TableHead>
@@ -97,9 +96,6 @@ export function ProductTable({
                     <TableCell>
                       {product.supplier ? (product.supplier.name || product.supplier.companyName) : 'N/A'}
                     </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {product.price ? `$${product.price.toFixed(2)}` : 'N/A'}
-                    </TableCell>
                     <TableCell className="text-right">
                       {product.currentQuantity}
                     </TableCell>
@@ -112,7 +108,7 @@ export function ProductTable({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end">
+                      <div className="flex justify-end opacity-0 transition-opacity group-hover:opacity-100">
                         <Button variant="ghost" size="icon" onClick={() => handleEditClick(product)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
@@ -131,7 +127,7 @@ export function ProductTable({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <FileText className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">No products found</p>

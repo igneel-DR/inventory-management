@@ -2,6 +2,8 @@ import express from 'express';
 import { processQuery, getQueryHistory, clearQueryHistory } from '../controllers/chatbotController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
+console.log('chatbotRoutes.js loaded');
+
 const router = express.Router();
 
 // All routes are protected by auth middleware

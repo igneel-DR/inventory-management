@@ -93,20 +93,6 @@ export function EditProductModal({
               <Input id="edit-minimumStockLevel" name="minimumStockLevel" type="number" value={editingProduct.minimumStockLevel} onChange={handleEditInputChange} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-price" className="text-right">Price ($)</Label>
-              <Input 
-                id="edit-price" 
-                name="price" 
-                type="number" 
-                min="0" 
-                step="0.01" 
-                placeholder="0.00" 
-                value={editingProduct.price || ''} 
-                onChange={handleEditInputChange} 
-                className="col-span-3" 
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-expirationDate" className="text-right">Expiration Date</Label>
               <Input id="edit-expirationDate" name="expirationDate" type="date" value={editingProduct.expirationDate || ''} onChange={handleEditInputChange} className="col-span-3" />
             </div>

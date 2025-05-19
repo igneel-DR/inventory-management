@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Building, ClipboardList, FileText, DollarSign } from 'lucide-react';
+import { Building, ClipboardList, FileText } from 'lucide-react';
 
 export function ProductInfoCard({ product }) {
   if (!product) return null;
@@ -47,18 +47,6 @@ export function ProductInfoCard({ product }) {
               <span>
                 {product.supplier 
                   ? (product.supplier.name || product.supplier.companyName) 
-                  : 'Not specified'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Price</h3>
-            <div className="flex items-center text-sm">
-              <DollarSign className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">
-                {product.price 
-                  ? `$${product.price.toFixed(2)}` 
                   : 'Not specified'}
               </span>
             </div>

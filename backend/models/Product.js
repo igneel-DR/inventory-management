@@ -44,6 +44,10 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: [0, 'Price cannot be negative'],
     },
+    sku: {
+      type: String,
+      trim: true,
+    },
     // unitPrice: { type: Number, default: 0 }, // For inventory valuation later
     // purchasePrice: { type: Number, default: 0 }, // For tracking costs
     expirationDate: { // This might be better handled at a batch/lot level for real-world scenarios

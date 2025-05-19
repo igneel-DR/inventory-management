@@ -21,63 +21,16 @@ export const processQuery = async (req, res) => {
       });
     }
 
-    // Check for potentially harmful operations in the query
-    const dangerousKeywords = ['delete', 'drop', 'remove', 'update', 'insert', 'create', 'modify'];
-    const isQueryDangerous = dangerousKeywords.some(keyword => 
-      message.toLowerCase().includes(keyword)
-    );
-    
-    // If the query seems like it might be trying to modify data, respond with a friendly message
-    if (isQueryDangerous) {
-      // Check more specifically if it looks like a data modification attempt
-      if (message.toLowerCase().match(/\b(delete|remove|drop)\s+(a|an|the|one|all|every|from)?\s*(product|supplier|category|item|record|database|inventory)/i)) {
-        console.log('Unauthorized operation detected in natural language query');
-        return res.status(200).json({
-          success: true,
-          originalMessage: message,
-          response: "I'm sorry, I can only provide information about your inventory. I cannot delete, update, or modify any data. Would you like to view or search for specific inventory items instead?"
-        });
-      }
-    }
-
     // Step 1: Convert natural language to SQL query
-    //console.log(`Processing query: ${message}`);
-    let sqlQuery;
-    
-    // Generate thinking steps to show in UI
-    const thinking = [
-      "Understanding your question...",
-      "Analyzing inventory database schema...",
-      "Translating to database query...",
-      "Validating query safety..."
-    ];
-    
-    try {
-      sqlQuery = await aiService.convertToSQL(message);
-      //console.log(`Generated SQL query: ${sqlQuery}`);
-    } catch (error) {
-      // If the error is about unauthorized operations, return a friendly message
-      if (error.message && (error.message.includes('Unauthorized operation') || 
-                           error.message.includes('Only read operations'))) {
-        return res.status(200).json({
-          success: true,
-          originalMessage: message,
-          thinking: thinking,
-          response: "I'm sorry, I can only provide information about your inventory. I cannot delete, update, or modify any data. Would you like to view or search for specific inventory items instead?"
-        });
-      }
-      // Otherwise re-throw the error to be caught by the outer catch block
-      throw error;
-    }
+    console.log(`Processing query: ${message}`);
+    const sqlQuery = await aiService.convertToSQL(message);
+    console.log(`Generated SQL query: ${sqlQuery}`);
 
     // Step 2: Execute the query against the database
-    thinking.push("Executing database query...");
     const results = await queryExecutor.executeQuery(sqlQuery);
-    //console.log(`Query execution returned ${results.length} results`);
+    console.log(`Query execution returned ${results.length} results`);
 
     // Step 3: Convert the results back to natural language
-    thinking.push("Formatting results into natural language...");
-    thinking.push("Preparing final response...");
     const response = await aiService.convertResultsToNaturalLanguage(
       message,
       sqlQuery,
@@ -90,26 +43,13 @@ export const processQuery = async (req, res) => {
       originalMessage: message,
       sqlQuery: sqlQuery,
       results: results,
-      thinking: thinking,
       response: response
     });
   } catch (error) {
     console.error('Error processing natural language query:', error);
-    
-    // Check if this is a security-related error
-    if (error.message && (error.message.includes('Unauthorized operation') || 
-                         error.message.includes('Only read operations'))) {
-      // Return a friendly message for security errors
-      return res.status(200).json({
-        success: true,
-        message: "I'm sorry, I can only provide information about your inventory. I cannot delete, update, or modify any data. Would you like to view or search for specific inventory items instead?"
-      });
-    }
-    
-    // For other errors, return a generic error message
     return res.status(500).json({ 
       success: false, 
-      message: 'I encountered an issue processing your request. Could you try asking in a different way?',
+      message: error.message || 'Failed to process query',
       error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
