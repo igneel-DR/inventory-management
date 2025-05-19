@@ -48,7 +48,7 @@ This inventory management system provides a full-featured platform for managing 
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/inventory-management.git
+git clone https://github.com/igneel-DR/inventory-management.git
 cd inventory-management
 ```
 
